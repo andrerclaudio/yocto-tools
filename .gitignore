@@ -5,3 +5,5 @@
 *.orig
 *.rej
 *~
+# VSCode
+.vscode
