@@ -5,12 +5,7 @@
 #include <linux/slab.h>
 #include <linux/uaccess.h>
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Andre Ribeiro");
-MODULE_DESCRIPTION("String loopback.");
-MODULE_VERSION("1.0");
-
-#define PROC_ENTRY_FILENAME "str_loopback"
+#define PROC_ENTRY_FILENAME "strloopbk"
 #define LPBK_MAX_USER_SIZE 1024
 
 static struct proc_dir_entry *lpbk_proc = NULL;
@@ -67,6 +62,11 @@ static void __exit lpbk_exit(void)
     proc_remove(lpbk_proc);
     printk(KERN_INFO "String Loopback module unloaded.\n");
 }
+
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Andre Ribeiro");
+MODULE_DESCRIPTION("String loopback.");
+MODULE_VERSION("1.0");
 
 module_init(lpbk_init);
 module_exit(lpbk_exit);

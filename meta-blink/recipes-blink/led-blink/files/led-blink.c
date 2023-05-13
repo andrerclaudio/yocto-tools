@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     unsigned int val;
     struct gpiod_chip *chip;
     struct gpiod_line *line;
-    int i, ret;
+    int i, j, ret;
 
     chip = gpiod_chip_open_by_name(chipname);
     if (!chip)
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
             goto release_line;
         }
         printf("Output %u on line #%u\n", val, line_num);
-        sleep(1);
+        for (j = 0; j < 1000; j++) usleep(250);
         val = !val;
     }
 
