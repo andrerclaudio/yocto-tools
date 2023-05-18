@@ -3,7 +3,6 @@
 #include <linux/init.h>
 #include <linux/proc_fs.h>
 #include <linux/slab.h>
-#include <linux/uaccess.h>
 #include <gpio.h>
 #include <stdio.h>
 
@@ -98,9 +97,9 @@ ssize_t stateCtrl_write(struct file *file, const char __user *user, size_t size,
     ret = gpiod_line_set_value(line, val);
     if (ret < 0)
     {
-        perror("Set line output failed\n");
+        printk(KERN_ERR "Set line output failed\n");
         gpiod_finish(RELEASE_LINE);
-        return 0;
+        return EXIT_FAILURE;
     }
 
     return size;
@@ -119,7 +118,7 @@ static int __init statectrl_init(void)
     if (!chip)
     {
         printk(KERN_ERR "Open chip failed\n");
-        return 0;
+        return EXIT_FAILURE;
     }
 
     line = gpiod_chip_get_line(chip, line_num);
@@ -127,18 +126,18 @@ static int __init statectrl_init(void)
     {
         printk(KERN_ERR "Get line failed\n");
         gpiod_finish(CLOSE_CHIP);
-        return 0;
+        return EXIT_FAILURE;
     }
 
     if (gpiod_line_request_output(line, CONSUMER, 0) < 0)
     {
         printk(KERN_ERR "Request line as output failed\n");
         gpiod_finish(RELEASE_LINE);
-        return 0;
+        return EXIT_FAILURE;
     }
 
     printk(KERN_INFO "Led state control module loaded.\n");
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 static void __exit statectrl_exit(void)
@@ -146,7 +145,7 @@ static void __exit statectrl_exit(void)
     gpiod_finish(RELEASE_LINE);
     proc_remove(stateCtrl_proc);
     printk(KERN_INFO "Led state control module unloaded.\n");
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 MODULE_LICENSE("GPL");
