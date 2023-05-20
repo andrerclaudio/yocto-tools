@@ -3,8 +3,8 @@
 #include <linux/init.h>
 #include <linux/proc_fs.h>
 #include <linux/slab.h>
-#include <gpio.h>
-#include <stdio.h>
+#include <linux/gpiod.h>
+#include <linux/stdio.h>
 
 #ifndef CONSUMER
 #define CONSUMER "Consumer"
@@ -21,6 +21,8 @@ typedef enum
 
 } gpiod_finish_t;
 
+char *chipname = "gpiochip4"; // In fact, GPIO5. But here you must subtract 1.
+unsigned int line_num = 9;    // GPIO Pin #9
 static struct gpiod_chip *chip;
 static struct gpiod_line *line;
 
