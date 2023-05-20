@@ -166,10 +166,7 @@ GpioPinError:
 	gpio_free(pin_number);
 AddError:
 	device_destroy(my_class, my_device_nr);
-FileError:
-	class_destroy(my_class);
-ClassError:
-	unregister_chrdev_region(my_device_nr, 1);
+
 	return -1;
 }
 

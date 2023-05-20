@@ -3,59 +3,35 @@
 #include <linux/init.h>
 #include <linux/proc_fs.h>
 #include <linux/slab.h>
-#include <linux/gpiod.h>
-#include <linux/stdio.h>
+#include <linux/uaccess.h>
+#include <linux/gpio.h>
 
 #ifndef CONSUMER
-#define CONSUMER "Consumer"
+    #define CONSUMER "Consumer"
 #endif
 
-#define PROC_ENTRY_FILENAME "statectrl"
-#define CTRL_MAX_USER_SIZE 1024
+#define PROC_ENTRY_FILENAME         "statectrl"
+#define CTRL_MAX_USER_SIZE          1024
+#define CHIP_NUMBER                 5
+#define LINE_NUMBER                 9
+#define IMX_GPIO_NR(port, index)    ((((port)-1)*32)+((index)&31))
 
-typedef enum
-{
-
-    CLOSE_CHIP = 0,
-    RELEASE_LINE,
-
-} gpiod_finish_t;
-
-char *chipname = "gpiochip4"; // In fact, GPIO5. But here you must subtract 1.
-unsigned int line_num = 9;    // GPIO Pin #9
-static struct gpiod_chip *chip;
-static struct gpiod_line *line;
+/* Global variables */
+static int pin_number = IMX_GPIO_NR(CHIP_NUMBER, LINE_NUMBER);
 
 static struct proc_dir_entry *stateCtrl_proc = NULL;
 static char data_buffer[CTRL_MAX_USER_SIZE];
 
 static char welc_msg_buffer[] = "The proc file is alive!\n";
 
+static ssize_t stateCtrl_read(struct file *file, char __user *user, size_t size, loff_t *off);
+static ssize_t stateCtrl_write(struct file *file, const char __user *user, size_t size, loff_t *off);
+
 static const struct proc_ops stateCtrl_proc_fops =
     {
         .proc_read = stateCtrl_read,
         .proc_write = stateCtrl_write,
 };
-
-static void gpiod_finish(gpiod_finish_t hw_identifier)
-{
-    /*
-    Release the requested hardware passing the hardware which should be close.
-    */
-
-    switch (hw_identifier)
-    {
-    default:
-    case RELEASE_LINE:
-        // If you got problems to set the pin direction, release the line and close the chip
-        printk(KERN_INFO "Line released!");
-        gpiod_line_release(line);
-    case CLOSE_CHIP:
-        // If you got problems to get the line, close the chip
-        printk(KERN_INFO "Chip closed!");
-        gpiod_chip_close(chip);
-    }
-}
 
 ssize_t stateCtrl_read(struct file *file, char __user *user, size_t size, loff_t *off)
 {
@@ -64,9 +40,6 @@ ssize_t stateCtrl_read(struct file *file, char __user *user, size_t size, loff_t
 
 ssize_t stateCtrl_write(struct file *file, const char __user *user, size_t size, loff_t *off)
 {
-    unsigned char val;
-    int ret;
-
     memset(data_buffer, 0x0, sizeof(data_buffer));
 
     if (size > CTRL_MAX_USER_SIZE)
@@ -81,27 +54,18 @@ ssize_t stateCtrl_write(struct file *file, const char __user *user, size_t size,
 
     printk(KERN_INFO "---> '%s'\n", data_buffer);
 
-    switch (data_buffer)
+
+    if (strcmp(data_buffer, "0") == 0)
     {
-    case "0":
-        val = 0;
-        break;
-
-    case "1":
-        val = 1;
-        break;
-
-    default:
-        val = 0;
-        break;
+        gpio_set_value(pin_number, 0);
     }
-
-    ret = gpiod_line_set_value(line, val);
-    if (ret < 0)
+    else if (strcmp(data_buffer, "1") == 0)
     {
-        printk(KERN_ERR "Set line output failed\n");
-        gpiod_finish(RELEASE_LINE);
-        return EXIT_FAILURE;
+        gpio_set_value(pin_number, 1);
+    }
+    else 
+    {
+        printk(KERN_ERR "Invalid value passed!\n");
     }
 
     return size;
@@ -116,38 +80,35 @@ static int __init statectrl_init(void)
         return -ENOMEM;
     }
 
-    chip = gpiod_chip_open_by_name(chipname);
-    if (!chip)
-    {
-        printk(KERN_ERR "Open chip failed\n");
-        return EXIT_FAILURE;
-    }
+	/* GPIO init */
+	if (gpio_request(pin_number, "iMX8"))
+	{
+		printk("Can not allocate GPIO.\n");
+		goto AddError;
+	}
 
-    line = gpiod_chip_get_line(chip, line_num);
-    if (!line)
-    {
-        printk(KERN_ERR "Get line failed\n");
-        gpiod_finish(CLOSE_CHIP);
-        return EXIT_FAILURE;
-    }
-
-    if (gpiod_line_request_output(line, CONSUMER, 0) < 0)
-    {
-        printk(KERN_ERR "Request line as output failed\n");
-        gpiod_finish(RELEASE_LINE);
-        return EXIT_FAILURE;
-    }
+	/* Set GPIO direction */
+	if (gpio_direction_output(pin_number, 0))
+	{
+		printk("Can not set GPIO to output!\n");
+		goto GpioPinError;
+	}
 
     printk(KERN_INFO "Led state control module loaded.\n");
-    return EXIT_SUCCESS;
+    return 0;
+
+GpioPinError:
+	gpio_free(pin_number);
+AddError:    
+return -1;
 }
 
 static void __exit statectrl_exit(void)
 {
-    gpiod_finish(RELEASE_LINE);
+    gpio_set_value(pin_number, 0);
+	gpio_free(pin_number);
     proc_remove(stateCtrl_proc);
     printk(KERN_INFO "Led state control module unloaded.\n");
-    return EXIT_SUCCESS;
 }
 
 MODULE_LICENSE("GPL");

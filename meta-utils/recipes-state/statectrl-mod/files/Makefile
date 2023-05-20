@@ -1,17 +1,12 @@
 obj-m := state-ctrl.o
 
 SRC := $(shell pwd)
-# LDFLAGS = -L/lib/modules/$(shell uname -r)/build
-KDIR = /lib/modules/$(shell uname -r)/build
-# LDLIBS = -lgpiod
 
 all:
-	$(MAKE) -C $(KDIR) $(KERNEL_SRC) M=$(SRC)
-# $(MAKE) -C $(KERNEL_SRC) M=$(SRC)
+	$(MAKE) -C $(KERNEL_SRC) M=$(SRC)
 
 modules_install:
-	$(MAKE) -C $(KDIR) $(KERNEL_SRC) M=$(SRC) modules_install
-# $(MAKE) -C $(KERNEL_SRC) M=$(SRC) modules_install
+	$(MAKE) -C $(KERNEL_SRC) M=$(SRC) modules_install
 
 clean:
 	rm -f *.o *~ core .depend .*.cmd *.ko *.mod.c
