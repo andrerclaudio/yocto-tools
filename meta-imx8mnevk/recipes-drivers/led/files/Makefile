@@ -1,4 +1,4 @@
-obj-m := echo-state.o
+obj-m := kernel-led-driver.o
 
 SRC := $(shell pwd)
 
