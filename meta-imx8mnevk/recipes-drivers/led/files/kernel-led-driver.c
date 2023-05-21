@@ -41,7 +41,7 @@ static void kdriverled_change_state(struct led_classdev *led_cdev, enum led_brig
 
 static int kdriverled_probe(struct platform_device *pdev)
 {
-    struct device_node *np = pdev->dev.of.node;
+    struct device_node *np = pdev->dev.of_node;
     struct device_node *child = NULL;
     int result, gpio;
 
@@ -56,7 +56,7 @@ static int kdriverled_probe(struct platform_device *pdev)
     result = devm_gpio_request(&pdev->dev, gpio, pdev->name);
     if (result)
     {
-        dev_err(&pdev->dev, "Erros requestion GPIO!\n");
+		dev_err(&pdev->dev, "Failed to request GPIO: %d\n", result);
         return result;
     }
 
@@ -66,13 +66,13 @@ static int kdriverled_probe(struct platform_device *pdev)
 
     gpiod_direction_output(kdriverled_data->desc, 0);
 
-    dev_info(&pdev->dev, "initialized.\n");
+    dev_info(&pdev->dev, "Initialized.\n");
     return 0;
 }
 
 static int kdriverled_remove(struct platform_device *pdev)
 {
-    dev_info(&pdev->dev, "exiting.\n");
+    dev_info(&pdev->dev, "Exiting.\n");
     return 0;
 }
 
@@ -82,7 +82,7 @@ static const struct of_device_id of_kdriverled_match[] = {
     {},
 };
 
-static struct platform_driver kdriverled_abstraction = {
+static struct platform_driver kdriverled_abs = {
 
     .driver = {
         .name = "kdriverled",
@@ -94,7 +94,7 @@ static struct platform_driver kdriverled_abstraction = {
     .remove = kdriverled_remove,
 };
 
-nodule_platform_driver(kdriverled_abstraction);
+module_platform_driver(kdriverled_abs);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Andre Ribeiro Claudio");
