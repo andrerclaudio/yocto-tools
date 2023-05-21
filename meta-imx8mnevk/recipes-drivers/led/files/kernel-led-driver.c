@@ -82,7 +82,7 @@ static const struct of_device_id of_kdriverled_match[] = {
     {},
 };
 
-static struct platform_driver kdriverled_abs = {
+static struct platform_driver kdriverled_driver = {
 
     .driver = {
         .name = "kdriverled",
@@ -94,7 +94,7 @@ static struct platform_driver kdriverled_abs = {
     .remove = kdriverled_remove,
 };
 
-module_platform_driver(kdriverled_abs);
+module_platform_driver(kdriverled_driver);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Andre Ribeiro Claudio");
