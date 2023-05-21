@@ -5,94 +5,96 @@
 #include <linux/slab.h>
 #include <linux/gpio.h>
 #include <linux/gpio/consumer.h>
+#include <linux/platform_device.h>
+#include <linux/of_gpio.h>
 
 /* Local definitions */
-#define DRIVER_NAME "kdriverled"
 #define LED_OFF 0
 #define LED_ON 1
-
-/* Macros for GPIO pin number calculation */
-#define CHIP_NUMBER 5
-#define LINE_NUMBER 9
-#define IMX_GPIO_NUMBER(port, index) ((((port)-1) * 32) + ((index)&31))
 
 /* Local struct definitions */
 struct kdriverled_data_st
 {
-	struct gpio_desc *desc;
-	struct led_classdev led_cdev;
+    struct gpio_desc *desc;
+    struct led_classdev led_cdev;
 };
 
 static struct kdriverled_data_st *kdriverled_data;
 
-// Global variable for GPIO pin number
-static int pin_number = IMX_GPIO_NUMBER(CHIP_NUMBER, LINE_NUMBER);
-
 // Function to set the LED status
 static void kdriverled_setled(unsigned int status)
 {
-	if (status == LED_ON)
-		gpiod_set_value(kdriverled_data->desc, LED_ON);
-	else
-		gpiod_set_value(kdriverled_data->desc, LED_OFF);
+    if (status == LED_ON)
+        gpiod_set_value(kdriverled_data->desc, LED_ON);
+    else
+        gpiod_set_value(kdriverled_data->desc, LED_OFF);
 }
 
 // Function to handle LED state change
 static void kdriverled_change_state(struct led_classdev *led_cdev, enum led_brightness brightness)
 {
-	if (brightness)
-		kdriverled_setled(LED_ON);
-	else
-		kdriverled_setled(LED_OFF);
+    if (brightness)
+        kdriverled_setled(LED_ON);
+    else
+        kdriverled_setled(LED_OFF);
 }
 
-// Module initialization function
-static int __init kdriverled_init(void)
+static int kdriverled_probe(struct platform_device *pdev)
 {
-	kdriverled_data = kzalloc(sizeof(*kdriverled_data), GFP_KERNEL);
-	if (!kdriverled_data)
-		return -ENOMEM;
+    struct device_node *np = pdev->dev.of.node;
+    struct device_node *child = NULL;
+    int result, gpio;
 
-	if (gpio_request(pin_number, DRIVER_NAME))
-	{
-		pr_err("%s: Error registering GPIO.\n", DRIVER_NAME);
-		goto ret_err_gpio_request;
-	}
+    child = of_get_next_child(np, NULL);
+    kdriverled_data = devm_kzalloc(&pdev->dev, sizeof(*kdriverled_data), GFP_KERNEL);
 
-	kdriverled_data->desc = gpio_to_desc(pin_number);
+    if (!kdriverled_data)
+        return -ENOMEM;
 
-	kdriverled_data->led_cdev.name = "ipe:red:user";
-	kdriverled_data->led_cdev.brightness_set = kdriverled_change_state;
+    gpio = of_get_gpio(child, 0);
 
-	if (led_classdev_register(NULL, &kdriverled_data->led_cdev))
-	{
-		pr_err("%s: Error registering the device.\n", DRIVER_NAME);
-		goto ret_err_led_classdev_register;
-	}
+    result = devm_gpio_request(&pdev->dev, gpio, pdev->name);
+    if (result)
+    {
+        dev_err(&pdev->dev, "Erros requestion GPIO!\n");
+        return result;
+    }
 
-	gpiod_direction_output(kdriverled_data->desc, 0);
+    kdriverled_data->desc = gpio_to_desc(gpio);
+    kdriverled_data->led_cdev.name = of_get_property(child, "label", NULL);
+    kdriverled_data->led_cdev.brightness_set = kdriverled_change_state;
 
-	pr_info("%s: Initialized!\n", DRIVER_NAME);
-	return 0;
+    gpiod_direction_output(kdriverled_data->desc, 0);
 
-ret_err_led_classdev_register:
-	gpio_free(pin_number);
-ret_err_gpio_request:
-	kfree(kdriverled_data);
-	return -1;
+    dev_info(&pdev->dev, "initialized.\n");
+    return 0;
 }
 
-// Module exit function
-static void __exit kdriverled_exit(void)
+static int kdriverled_remove(struct platform_device *pdev)
 {
-	led_classdev_unregister(&kdriverled_data->led_cdev);
-	gpio_free(pin_number);
-	kfree(kdriverled_data);
-	pr_info("%s: Exiting!\n", DRIVER_NAME);
+    dev_info(&pdev->dev, "exiting.\n");
+    return 0;
 }
 
-module_init(kdriverled_init);
-module_exit(kdriverled_exit);
+static const struct of_device_id of_kdriverled_match[] = {
+
+    {.compatible = "agnes,kdriverled"},
+    {},
+};
+
+static struct platform_driver kdriverled_abstraction = {
+
+    .driver = {
+        .name = "kdriverled",
+        .owner = THIS_MODULE,
+        .of_match_table = of_kdriverled_match,
+    },
+
+    .probe = kdriverled_probe,
+    .remove = kdriverled_remove,
+};
+
+nodule_platform_driver(kdriverled_abstraction);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Andre Ribeiro Claudio");
