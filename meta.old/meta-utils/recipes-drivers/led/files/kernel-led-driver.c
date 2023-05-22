@@ -64,7 +64,10 @@ static int kdriverled_probe(struct platform_device *pdev)
     kdriverled_data->led_cdev.name = of_get_property(child, "label", NULL);
     kdriverled_data->led_cdev.brightness_set = kdriverled_change_state;
 
+    // Set direction as output
     gpiod_direction_output(kdriverled_data->desc, 0);
+
+    platform_set_drvdata(pdev, kdriverled_data);
 
     dev_info(&pdev->dev, "Initialized.\n");
     return 0;
@@ -78,7 +81,7 @@ static int kdriverled_remove(struct platform_device *pdev)
 
 static const struct of_device_id of_kdriverled_match[] = {
 
-    {.compatible = "agnes,kdriverled"},
+    {.compatible = "kdriverled", },
     {},
 };
 
