@@ -276,11 +276,11 @@ PACKAGECONFIG:append:pn-qemu-system-native = " sdl"
 CONF_VERSION = "2"
 
 # Machine wide shared state cache
-SSTATE_DIR = "/mnt/yocto/shared/sstate-cache/"
+SSTATE_DIR = "/media/algernon/external/yocto/shared/sstate-cache/"
 # Machine wide download cache
-DL_DIR = "/mnt/yocto/shared/downloads/"
+DL_DIR = "/media/algernon/external/yocto/shared/downloads/"
 # Use a shared persistent cache
-PERSISTENT_DIR = "/mnt/yocto/shared/persistent/"
+PERSISTENT_DIR = "/media/algernon/external/yocto/shared/persistent/"
 # Generate tarballs from fetches from revision control
 BB_GENERATE_MIRROR_TARBALLS = "1"
 
@@ -305,7 +305,7 @@ RM_OLD_IMAGE = "1"
 INHERIT += "rm_work"
 
 # Install some tools
-IMAGE_INSTALL:append = " nano"
+IMAGE_INSTALL:append = " nano htop ntp python3-dev python3-pillow python3-pip python3-setuptools git tzdata"
 
 # Add a ouu-of-tree kermel module
 # MACHINE_EXTRA_RDEPENDS += "kernel-module-devicefunc"
