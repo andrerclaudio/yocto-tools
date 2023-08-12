@@ -1,8 +1,3 @@
-# SPDX-FileCopyrightText: 2016 Tony DiCola for Adafruit Industries
-#
-# SPDX-License-Identifier: MIT
-
-
 """
 `Adafruit_PureIO.smbus`
 ================================================================================
