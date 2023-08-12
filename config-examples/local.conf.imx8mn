@@ -23,11 +23,11 @@ PACKAGE_CLASSES = "package_deb"
 EXTRA_IMAGE_FEATURES += "package-management"
 
 # Machine wide shared state cache
-SSTATE_DIR = "/home/algernon/Desktop/yocto/shared/sstate-cache/"
+SSTATE_DIR = "/media/algernon/external/yocto/shared/sstate-cache/"
 # Machine wide download cache
-DL_DIR = "/home/algernon/Desktop/yocto/shared/downloads/"
+DL_DIR = "/media/algernon/external/yocto/shared/downloads/"
 # Use a shared persistent cache
-PERSISTENT_DIR = "/home/algernon/Desktop/yocto/shared/persistent/"
+PERSISTENT_DIR = "/media/algernon/external/yocto/shared/persistent/"
 # Generate tarballs from fetches from revision control
 BB_GENERATE_MIRROR_TARBALLS = "1"
 
