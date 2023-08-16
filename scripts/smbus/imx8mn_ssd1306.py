@@ -81,14 +81,14 @@ class SSD1306Base(object):
         self._i2c_address = i2c_address
         self._i2c = SMBus(i2c_bus)
 
-    def exit(self):
-        """Turn off the Display and freed the bus."""
-        self.command(SSD1306_DISPLAYOFF)                    # 0xAE
-        self._i2c.close()
-    
     def _initialize(self):
         """Initializa the display"""
         raise NotImplementedError
+    
+    def close(self):
+        """Turn off the Display and freed the bus."""
+        self.command(SSD1306_DISPLAYOFF)                    # 0xAE
+        self._i2c.close()
 
     def command(self, c):
         """Send command byte to display."""    
