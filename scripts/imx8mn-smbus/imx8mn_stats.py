@@ -21,6 +21,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 import time
+import logging
+import socket
 
 from imx8mn_ssd1306 import SSD1306_128_32
 
@@ -29,6 +31,8 @@ from PIL import ImageDraw
 from PIL import ImageFont
 
 import subprocess
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 # 128x32 display with hardware I2C:
 disp = SSD1306_128_32(i2c_bus=2)
@@ -68,6 +72,13 @@ font = ImageFont.load_default()
 # Some other nice fonts to try: http://www.dafont.com/bitmap.php
 # font = ImageFont.truetype('Minecraftia.ttf', 8)
 
+hostname=socket.gethostname()   
+IPAddr=socket.gethostbyname(hostname) 
+
+s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+s.connect(('8.8.8.8', 1))  # connect() for UDP doesn't send packets
+IPAddr = s.getsockname()[0]
+
 try:
     
     while True:
@@ -76,30 +87,35 @@ try:
         draw.rectangle((0,0,width,height), outline=0, fill=0)
     
         # Shell scripts for system monitoring from here : https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
-        cmd = "hostname -I | cut -d\' \' -f1"
+        cmd = "hostname | cut -d\' \' -f1"
         IP = subprocess.check_output(cmd, shell = True )
         cmd = "top -bn1 | grep load | awk '{printf \"CPU Load: %.2f\", $(NF-2)}'"
         CPU = subprocess.check_output(cmd, shell = True )
-        cmd = "free -m | awk 'NR==2{printf \"Mem: %s/%sMB %.2f%%\", $3,$2,$3*100/$2 }'"
+        cmd = "free -m | awk 'NR==2{printf \"Mem: %s/%sMB\", $3,$2 }'"
         MemUsage = subprocess.check_output(cmd, shell = True )
         cmd = "df -h | awk '$NF==\"/\"{printf \"Disk: %d/%dGB %s\", $3,$2,$5}'"
         Disk = subprocess.check_output(cmd, shell = True )
     
         # Write two lines of text.
+
+        CPU = CPU.decode()
+        MemUsage = str(MemUsage.decode())
+        Disk = Disk.decode()
     
-        draw.text((x, top),       "IP: " + str(IP),  font=font, fill=255)
-        draw.text((x, top+8),     str(CPU), font=font, fill=255)
-        draw.text((x, top+16),    str(MemUsage),  font=font, fill=255)
-        draw.text((x, top+25),    str(Disk),  font=font, fill=255)
+        draw.text((x, top),       hostname,  font=font, fill=255)
+        draw.text((x, top+8),     "IP: " + str(IPAddr),  font=font, fill=255)
+        draw.text((x, top+16),    str(CPU), font=font, fill=255)
+        draw.text((x, top+25),    str(MemUsage),  font=font, fill=255)
     
         # Display image.
         disp.image(image)
         disp.display()
         time.sleep(.1)
         
-except KeyboardInterrupt:
-    pass
+except KeyboardInterrupt as e:
+    logging.exception("Keyboard interruption.", exc_info=False)
 
 finally:
+    logging.info("Cleaning up the bus and Display!")
     disp.close()
     

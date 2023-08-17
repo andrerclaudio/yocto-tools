@@ -25,7 +25,7 @@ import logging
 import time
 from smbus import SMBus
 
-# logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 # Constants
 SSD1306_I2C_ADDRESS = 0x3C    # 011110+SA0+RW - 0x3C or 0x3D
@@ -64,26 +64,55 @@ SSD1306_LEFT_HORIZONTAL_SCROLL = 0x27
 SSD1306_VERTICAL_AND_RIGHT_HORIZONTAL_SCROLL = 0x29
 SSD1306_VERTICAL_AND_LEFT_HORIZONTAL_SCROLL = 0x2A
 
-class SSD1306Base(object):
-    """Base class for SSD1306-based OLED displays.  Implementors should subclass
-    and provide an implementation for the _initialize function.
-    """
+class SSD1306_128_32(object):
 
-    def __init__(self, width, height, i2c_bus, i2c_address=SSD1306_I2C_ADDRESS):
+    def __init__(self, i2c_bus, i2c_address=SSD1306_I2C_ADDRESS, vccstate=SSD1306_SWITCHCAPVCC):
         """Base parameters"""
         self._log = logging.getLogger('Diplay Oled SSD1306 implementation!')
-        self.width = width
-        self.height = height
-        self._pages = height//8
-        self._buffer = [0]*(width*self._pages)
-
+        self.width = 128
+        self.height = 32
+        self._pages = self.height//8
+        self._buffer = [0]*(self.width*self._pages)
+        # Save vcc state.
+        self._vccstate = vccstate
         # Handle hardware I2C
         self._i2c_address = i2c_address
         self._i2c = SMBus(i2c_bus)
+        logging.info(self._i2c)      
+        self._initialize()  
 
     def _initialize(self):
-        """Initializa the display"""
-        raise NotImplementedError
+        # 128x32 pixel specific initialization.
+        self.command(SSD1306_DISPLAYOFF)                    # 0xAE
+        self.command(SSD1306_SETDISPLAYCLOCKDIV)            # 0xD5
+        self.command(0x80)                                  # the suggested ratio 0x80
+        self.command(SSD1306_SETMULTIPLEX)                  # 0xA8
+        self.command(0x1F)
+        self.command(SSD1306_SETDISPLAYOFFSET)              # 0xD3
+        self.command(0x0)                                   # no offset
+        self.command(SSD1306_SETSTARTLINE | 0x0)            # line #0
+        self.command(SSD1306_CHARGEPUMP)                    # 0x8D
+        if self._vccstate == SSD1306_EXTERNALVCC:
+            self.command(0x10)
+        else:
+            self.command(0x14)
+        self.command(SSD1306_MEMORYMODE)                    # 0x20
+        self.command(0x00)                                  # 0x0 act like ks0108
+        self.command(SSD1306_SEGREMAP | 0x1)
+        self.command(SSD1306_COMSCANDEC)
+        self.command(SSD1306_SETCOMPINS)                    # 0xDA
+        self.command(0x02)
+        self.command(SSD1306_SETCONTRAST)                   # 0x81
+        self.command(0x8F)
+        self.command(SSD1306_SETPRECHARGE)                  # 0xd9
+        if self._vccstate == SSD1306_EXTERNALVCC:
+            self.command(0x22)
+        else:
+            self.command(0xF1)
+        self.command(SSD1306_SETVCOMDETECT)                 # 0xDB
+        self.command(0x40)
+        self.command(SSD1306_DISPLAYALLON_RESUME)           # 0xA4
+        self.command(SSD1306_NORMALDISPLAY)                 # 0xA6
     
     def close(self):
         """Turn off the Display and freed the bus."""
@@ -102,13 +131,8 @@ class SSD1306Base(object):
         control = 0x40   # Co = 0, DC = 0
         self._i2c.write_byte_data(self._i2c_address, control, c)
 
-    def begin(self, vccstate=SSD1306_SWITCHCAPVCC):
-        """Initialize display."""
-        # Save vcc state.
-        self._vccstate = vccstate
-        # Reset and initialize display.
-        # self._reset()
-        # self._initialize()
+    def begin(self):
+        """Initialize display."""        
         # Turn on the display.
         self.command(SSD1306_DISPLAYON)
 
@@ -121,8 +145,8 @@ class SSD1306Base(object):
         self.command(0)              # Page start address. (0 = reset)
         self.command(self._pages-1)  # Page end address.
         # Write buffer data.        
-        control = 0x40   # Co = 0, DC = 0
-        for i in range(0, len(self._buffer), 16):            
+        for i in range(0, len(self._buffer), 16): 
+            control = 0x40   # Co = 0, DC = 0           
             self._i2c.write_i2c_block_data(self._i2c_address, control, self._buffer[i:i+16])
 
     def image(self, image):
@@ -177,42 +201,4 @@ class SSD1306Base(object):
             else:
                 contrast = 0xCF
             self.set_contrast(contrast)
-
-class SSD1306_128_32(SSD1306Base):
-
-    def __init__(self, i2c_bus, i2c_address=SSD1306_I2C_ADDRESS):
-        # Call base class constructor.
-        super(SSD1306_128_32, self).__init__(128, 32, i2c_bus, i2c_address)
-
-    def _initialize(self):
-        # 128x32 pixel specific initialization.
-        self.command(SSD1306_DISPLAYOFF)                    # 0xAE
-        self.command(SSD1306_SETDISPLAYCLOCKDIV)            # 0xD5
-        self.command(0x80)                                  # the suggested ratio 0x80
-        self.command(SSD1306_SETMULTIPLEX)                  # 0xA8
-        self.command(0x1F)
-        self.command(SSD1306_SETDISPLAYOFFSET)              # 0xD3
-        self.command(0x0)                                   # no offset
-        self.command(SSD1306_SETSTARTLINE | 0x0)            # line #0
-        self.command(SSD1306_CHARGEPUMP)                    # 0x8D
-        if self._vccstate == SSD1306_EXTERNALVCC:
-            self.command(0x10)
-        else:
-            self.command(0x14)
-        self.command(SSD1306_MEMORYMODE)                    # 0x20
-        self.command(0x00)                                  # 0x0 act like ks0108
-        self.command(SSD1306_SEGREMAP | 0x1)
-        self.command(SSD1306_COMSCANDEC)
-        self.command(SSD1306_SETCOMPINS)                    # 0xDA
-        self.command(0x02)
-        self.command(SSD1306_SETCONTRAST)                   # 0x81
-        self.command(0x8F)
-        self.command(SSD1306_SETPRECHARGE)                  # 0xd9
-        if self._vccstate == SSD1306_EXTERNALVCC:
-            self.command(0x22)
-        else:
-            self.command(0xF1)
-        self.command(SSD1306_SETVCOMDETECT)                 # 0xDB
-        self.command(0x40)
-        self.command(SSD1306_DISPLAYALLON_RESUME)           # 0xA4
-        self.command(SSD1306_NORMALDISPLAY)                 # 0xA6
+  
