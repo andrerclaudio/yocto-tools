@@ -1,0 +1,92 @@
+#
+# Add a new LED to EVK board. 
+# It will be present on linux /sys/bus environment.
+#
+gpio-leds {
+
+	compatible = "gpio-leds";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_gpio_led>;
+
+	status {
+		label = "yellow:status";
+		gpios = <&gpio3 16 GPIO_ACTIVE_HIGH>;
+		linux,default-trigger = "heartbeat";
+	};
+
+	app {
+		label = "led-color:app-state";
+		gpios = <&gpio5 9 GPIO_ACTIVE_HIGH>;
+		linux,default-trigger = "heartbeat";
+	};
+};
+
+#
+# Add a physical button to EVK board other than OFF and RESET buttons.
+# It will be present on linux /sys/bus environment.
+# 
+gpio-keys {
+	compatible = "gpio-keys";
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_gpio_key>;
+	
+	button {
+		label = "button:app-action";
+		gpios = <&gpio5 8 GPIO_ACTIVE_LOW>;
+		linux,code = <KEY_1>;
+	};
+};
+
+#
+# Add a Temperature sensor to EVK board using I2C bus.
+# It will be present on linux /sys/bus environment.
+# You must adjust the system using Menuconfig and enabling LM75a throught hardware monitoring.
+# 
+sensor@48 {
+	compatible = "national,lm75a";
+	reg = <0x48>;
+	status = "okay";
+  };
+
+#
+# Add a Oled Display to EVK board using I2C bus.
+# It will be present on linux /sys/bus environment as a Frame Buffer.
+# You must adjust the system using Menuconfig and enabling Solomon video driver.
+# If using Python wrapper script you do not need to enable it here.
+# 
+ssd1306: oled@3c {
+	compatible = "solomon,ssd1306fb-i2c";
+	reg = <0x3c>;
+	solomon,height = <32>;
+	solomon,width = <128>;
+	solomon,com-seq;
+	solomon,com-invdir;
+	solomon,page-offset = <0>;
+	solomon,prechargep1 = <2>;
+	solomon,prechargep2 = <13>;
+	status = "okay";
+};
+
+&iomuxc {
+
+	# 
+	# Mapping the pin as output.
+	# You must to disable the Uart3 peripheral.
+	#
+	pinctrl_gpio_led: gpioledgrp {
+		fsl,pins = <
+			MX8MN_IOMUXC_NAND_READY_B_GPIO3_IO16	0x19
+			MX8MN_IOMUXC_ECSPI1_SS0_GPIO5_IO9		0x19
+		>;
+	};
+
+	#
+	# Mapping the pin as input and Pull-up enable.
+	# You must to disable the Uart3 peripheral.
+	#
+	pinctrl_gpio_key: gpiokeygrp {
+		fsl,pins = <
+			MX8MN_IOMUXC_ECSPI1_MISO_GPIO5_IO8		0x157
+		>;
+	};
+};

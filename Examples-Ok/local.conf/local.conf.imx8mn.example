@@ -1,0 +1,87 @@
+MACHINE ??= 'imx8mn-lpddr4-evk'
+DISTRO ?= 'fsl-imx-wayland'
+PACKAGE_CLASSES ?= 'package_rpm'
+EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
+USER_CLASSES ?= "buildstats"
+PATCHRESOLVE = "noop"
+BB_DISKMON_DIRS ??= "\
+    STOPTASKS,${TMPDIR},1G,100K \
+    STOPTASKS,${DL_DIR},1G,100K \
+    STOPTASKS,${SSTATE_DIR},1G,100K \
+    STOPTASKS,/tmp,100M,100K \
+    HALT,${TMPDIR},100M,1K \
+    HALT,${DL_DIR},100M,1K \
+    HALT,${SSTATE_DIR},100M,1K \
+    HALT,/tmp,10M,1K"
+PACKAGECONFIG:append:pn-qemu-system-native = " sdl"
+CONF_VERSION = "2"
+
+ACCEPT_FSL_EULA = "1"
+
+# Switch to Debian packaging and include package-management in the image
+PACKAGE_CLASSES = "package_deb"
+EXTRA_IMAGE_FEATURES += "package-management"
+
+# Machine wide shared state cache, downloads and persistent files
+SHARED_DRIVE_PATH = "/media/algernon/external/yocto/shared"
+SSTATE_DIR = "${SHARED_DRIVE_PATH}/sstate-cache/"
+DL_DIR = "${SHARED_DRIVE_PATH}/downloads/"
+PERSISTENT_DIR = "${SHARED_DRIVE_PATH}/persistent/"
+
+# Generate tarballs from fetches from revision control
+BB_GENERATE_MIRROR_TARBALLS = "1"
+
+BB_SIGNATURE_HANDLER = "OEEquivHash"
+BB_HASHSERVE = "auto"
+BB_HASHSERVE_UPSTREAM = "hashserv.yocto.io:8687"
+SSTATE_MIRRORS ?= "file://.* https://sstate.yoctoproject.org/all/PATH;downloadfilename=PATH"
+
+# Remove the old image before the new one generated to save disk space
+RM_OLD_IMAGE = "1"
+# Clean up working directory after build
+INHERIT += "rm_work"
+#Choose right Wifi firmware
+PREFERRED_RPROVIDER_linux-firmware-bcm4359-pcie = "linux-firmware"
+
+# Install some tools
+IMAGE_INSTALL:append = " nano htop ntp procps git tzdata iperf3"
+
+# Setup eSDK
+SDK_EXT_TYPE = "full"
+
+############################ Use block below if you want to add a new reguldar user to the system.
+
+# INHERIT += "extrausers"
+# IMAGE_INSTALL:append = " sudo"
+
+# ***** DON'T FORGET ***** to comment the line --> EXTRA_IMAGE_FEATURES ?= "debug-tweaks" and then inhibit to log in without password
+
+# This password is generated with `openssl passwd -6 password`, where -6 stands for SHA-512 hashing alorithgm
+# The resulting string is in format $<ALGORITHM_ID>$<SALT>$<PASSWORD_HASH>, the dollar signs have been escaped
+# This'll allow user to login with the least secure password there is, "12345678" (without quotes)
+
+# PASSWD = "\$6\$aWkWCMANJREcS8Lj\$92bVEBHX5UnYGia6fJJ/KspecJ4sev4W4SK8Pg6lIBL3JPXVQ4yNXJHs0u6ZfexwZxAKJMfvCwjvBZgo5wMaj1"
+
+# This creates a user with name agnes and UID 1200. The password is stored in the PASSWD variable, and home-folder
+# is /home/agnes, and the login-shell is set as sh. Finally, this user is added to the sudo-group.
+# and also changing the root password to ${PASSWD}
+
+# EXTRA_USERS_PARAMS = "\
+#     useradd -u 1200 -d /home/agnes -s /bin/sh -p '${PASSWD}' agnes; \
+#     usermod -a -G sudo agnes; \
+#     usermod -p '${PASSWD}' root; \
+#     "
+
+####### -------------------------------------------------------------------------------------------------------------------------------
+
+# Add a ouu-of-tree kermel module
+# MACHINE_EXTRA_RDEPENDS += "kernel-module-kdriverled"
+# Start the out-of-tree at start-up time
+# KERNEL_MODULE_AUTOLOAD += ""
+
+# Defines additional free disk space created in the image in Kbytes. By default, this variable is set to “0”. 
+# This free disk space is added to the image after the build system determines the image size as described in IMAGE_ROOTFS_SIZE.
+# IMAGE_ROOTFS_EXTRA_SPACE = "5242880"
+
+# BB_NUMBER_THREADS = "9"
+# PARALLEL_MAKE = "-j 9"
