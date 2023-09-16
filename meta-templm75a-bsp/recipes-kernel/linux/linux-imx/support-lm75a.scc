@@ -1,0 +1,5 @@
+# SPDX-License-Identifier: MIT
+define KFEATURE_DESCRIPTION "Give support to LM75a"
+define KFEATURE_COMPATIBILITY board
+
+kconf hardware support-lm75a.cfg
