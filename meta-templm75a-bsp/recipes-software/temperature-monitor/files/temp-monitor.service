@@ -1,0 +1,14 @@
+[Unit]
+Description=GNU Environment temperature presented in an Oled Display as a service
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=python3 /usr/share/temp-monitor/imx8mn_temp.py
+ExecStop=/bin/kill -INT $MAINPID
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

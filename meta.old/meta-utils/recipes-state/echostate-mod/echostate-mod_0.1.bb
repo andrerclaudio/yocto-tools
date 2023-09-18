@@ -1,7 +1,7 @@
 SUMMARY = "Echo state to a GPIO added external Linux kernel module using proc virtual file"
 DESCRIPTION = "${SUMMARY}"
-LICENSE = "GPL-2.0-only"
-LIC_FILES_CHKSUM = "file://COPYING;md5=12f884d2ae1ff87c09e5b7ccc2c4ca7e"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COREBASE}/meta/COPYING.MIT;md5=3da9cfbcb788c80a0384361b4de20420"
 
 # MODULES_MODULE_SYMVERS_LOCATION = "~/usr/src/linux-headers-$(uname -r)/Module.symvers"
 # DEPENDS += "libgpiod"
