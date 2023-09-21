@@ -292,8 +292,6 @@ BB_GENERATE_MIRROR_TARBALLS = "1"
 RM_OLD_IMAGE = "1"
 # Clean up working directory after build
 INHERIT += "rm_work"
-#Choose right Wifi firmware
-PREFERRED_RPROVIDER_linux-firmware-bcm4359-pcie = "linux-firmware"
 
 # Install some tools
 IMAGE_INSTALL:append = " nano htop ntp procps git tzdata iperf3"
