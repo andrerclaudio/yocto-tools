@@ -23,7 +23,7 @@ PACKAGE_CLASSES = "package_deb"
 EXTRA_IMAGE_FEATURES += "package-management"
 
 # Machine wide shared state cache, downloads and persistent files
-SHARED_DRIVE_PATH = "/media/algernon/external/yocto/shared"
+SHARED_DRIVE_PATH = "/home/asimov/yocto/shared"
 SSTATE_DIR = "${SHARED_DRIVE_PATH}/sstate-cache/"
 DL_DIR = "${SHARED_DRIVE_PATH}/downloads/"
 PERSISTENT_DIR = "${SHARED_DRIVE_PATH}/persistent/"
@@ -40,8 +40,10 @@ SSTATE_MIRRORS ?= "file://.* https://sstate.yoctoproject.org/all/PATH;downloadfi
 RM_OLD_IMAGE = "1"
 # Clean up working directory after build
 INHERIT += "rm_work"
-#Choose right Wifi firmware
+
+# Choose right firmware
 PREFERRED_RPROVIDER_linux-firmware-bcm4359-pcie = "linux-firmware"
+PREFERRED_RPROVIDER_ssh = "openssh"
 
 # Install some tools
 IMAGE_INSTALL:append = " nano htop ntp procps git tzdata iperf3"

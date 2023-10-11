@@ -280,7 +280,7 @@ PACKAGE_CLASSES = "package_deb"
 EXTRA_IMAGE_FEATURES += "package-management"
 
 # Machine wide shared state cache, downloads and persistent files
-SHARED_DRIVE_PATH = "/media/algernon/external/yocto/shared"
+SHARED_DRIVE_PATH = "/home/asimov/yocto/shared"
 SSTATE_DIR = "${SHARED_DRIVE_PATH}/sstate-cache/"
 DL_DIR = "${SHARED_DRIVE_PATH}/downloads/"
 PERSISTENT_DIR = "${SHARED_DRIVE_PATH}/persistent/"
@@ -298,6 +298,8 @@ IMAGE_INSTALL:append = " nano htop ntp procps git tzdata iperf3"
 
 # Setup eSDK
 SDK_EXT_TYPE = "full"
+
+PREFERRED_RPROVIDER_ssh = "openssh"
 
 ############################ Use block below if you want to add a new reguldar user to the system.
 
