@@ -1,13 +1,13 @@
 #include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
 #include <string.h>
-#include <limits.h>
 #include <getopt.h>
-#include <sys/stat.h>
 
-#define SUCCESS     0
+#define __HELP                      (0)
+#define __FAIL                      (-1)
+
+#define __ARGC_NULL                 (-1)
+
+#define OLED_TYPE_BUFFER_SIZE       (10)
 
 void print_help(void) {
 
@@ -28,20 +28,25 @@ void print_help(void) {
 
 int main (int argc, char **argv) {
 
-    char oled_type[10] = {0};
-
+    char oled_type[OLED_TYPE_BUFFER_SIZE] = {0};
     int cmd_opt = 0;
 
-    while(cmd_opt != -1) {
+    while(cmd_opt != __ARGC_NULL) {
 
         cmd_opt = getopt(argc, argv, "I:c::d:f:hi:l:m:n:r:x:y:");
+
+        if (argc < 2) {
+
+            printf("Arguments must be passed. Enter with 'main -h' to see to get help!\n");
+            return __FAIL;
+        }
 
         /* Lets parse */
         switch (cmd_opt) {
 
             default:
                 print_help();
-                return 1;
+                return __HELP;
 
             case 'I':
                 strncpy(oled_type, optarg, sizeof(oled_type));
@@ -68,7 +73,7 @@ int main (int argc, char **argv) {
 
             case 'h':
                 print_help();
-                return 0;
+                return __HELP;
 
             case 'i':
                 // inverted = atoi(optarg);
@@ -103,7 +108,7 @@ int main (int argc, char **argv) {
                 // y = atoi(optarg);
                 break;
 
-            case -1:
+            case __ARGC_NULL:
                 // Do nothing
                 break;
 
@@ -112,36 +117,34 @@ int main (int argc, char **argv) {
                 if (optopt == 'I')
                 {
                     printf("prams -%c missing oled type (128x64/128x32/64x48)\n", optopt);
-                    return 1;
+                    return __FAIL;
                 }
                 else if (optopt == 'd' || optopt == 'f' || optopt == 'i')
                 {
                     printf("prams -%c missing 0 or 1 fields\n", optopt);
-                    return 1;
+                    return __FAIL;
                 }
                 else if (optopt == 'l' || optopt == 'm')
                 {
                     printf("prams -%c missing string\n", optopt);
-                    return 1;
+                    return __FAIL;
                 }
                 else if (optopt == 'n')
                 {
                     printf("prams -%c missing 0,1,2... I2C device node number\n", optopt);
-                    return 1;
+                    return __FAIL;
                 }
                 else if (optopt == 'r')
                 {
                     printf("prams -%c missing 0 or 180 fields\n", optopt);
-                    return 1;
+                    return __FAIL;
                 }
                 else if (optopt == 'x' || optopt == 'y')
                 {
                     printf("prams -%c missing coordinate values\n", optopt);
-                    return 1;
+                    return __FAIL;
                 }
                 break;
         }
     }
-
-    return SUCCESS;
 }
