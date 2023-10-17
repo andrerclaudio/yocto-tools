@@ -1,15 +1,34 @@
-#include <stdio.h>
-#include <string.h>
 #include <getopt.h>
+#include "commons.h"
+#include "ssd1306.h"
 
-#define __HELP                      (0)
-#define __FAIL                      (-1)
+// Status return
+#define __NO_OP                     (0)
+#define __FAIL                      (1)
 
+// Arguments coutner feedback
 #define __ARGC_NULL                 (-1)
 
-#define OLED_TYPE_BUFFER_SIZE       (10)
+#define LINE_BUFFER_MAX_SIZE        (32)
+#define MSG_BUFFER_MAX_SIZE         (128)
 
-void print_help(void) {
+typedef struct display_settings {
+    
+    int clear;
+    int status;
+    int font;
+    int inverted;
+    int orientation;
+    int x;
+    int y;
+    char line[LINE_BUFFER_MAX_SIZE];
+    char msg[MSG_BUFFER_MAX_SIZE];
+    uint8_t i2c_node_address;
+
+} display_settings_t;
+
+
+static void print_help(void) {
 
     printf("\n");
     printf("---- SSD1306 Driver ---- \n\n");
@@ -28,7 +47,10 @@ void print_help(void) {
 
 int main (int argc, char **argv) {
     
+    // Arg variable controller
     int cmd_opt = 0;
+    // Display settings 
+    display_settings_t display;
 
     while(cmd_opt != __ARGC_NULL) {
 
@@ -44,63 +66,59 @@ int main (int argc, char **argv) {
         switch (cmd_opt) {
 
             default:
+
                 print_help();
-                return __HELP;
+                return __FAIL;
 
             case 'c':
-                if (optarg)
-                {
-                    // clear_line = atoi(optarg);
-                }
-                else
-                {
-                    // clear_all = 1;
-                }
+
+                if (optarg) display.clear = atoi(optarg);                
+                else display.clear = 1;
                 break;
 
             case 'd':
-                // display = atoi(optarg);
+                display.status = atoi(optarg);
                 break;
 
             case 'f':
-                // font = atoi(optarg);
+                display.font = atoi(optarg);
                 break;
 
             case 'h':
                 print_help();
-                return __HELP;
+                return __NO_OP;
 
             case 'i':
-                // inverted = atoi(optarg);
+                display.inverted = atoi(optarg);
                 break;
 
             case 'l':
-                // strncpy(line, optarg, sizeof(line));
+                strncpy(display.line, optarg, LINE_BUFFER_MAX_SIZE);
                 break;
 
             case 'm':
-                // strncpy(msg, optarg, sizeof(msg));
+                strncpy(display.msg, optarg, MSG_BUFFER_MAX_SIZE);
                 break;
 
             case 'n':
-                // i2c_node_address = (uint8_t)atoi(optarg);
+                display.i2c_node_address = (uint8_t)atoi(optarg);
                 break;
 
             case 'r':
-                // orientation = atoi(optarg);
-                // if (orientation != 0 && orientation != 180)
-                // {
-                //     printf("orientation value must be 0 or 180\n");
-                //     return 1;
-                // }
+                display.orientation = atoi(optarg);
+                if (display.orientation != 0 && display.orientation != 180)
+                {
+                    printf("Orientation value must be 0 or 180\n");
+                    return __FAIL;
+                }
                 break;
 
             case 'x':
-                // x = atoi(optarg);
+                display.x = atoi(optarg);
                 break;
 
             case 'y':
-                // y = atoi(optarg);
+                display.y = atoi(optarg);
                 break;
 
             case __ARGC_NULL:
@@ -142,4 +160,16 @@ int main (int argc, char **argv) {
                 break;
         }
     }
+
+    uint8_t rc = 0;
+    
+    // open the I2C device node
+    rc = ssd1306_init(display.i2c_node_address);
+
+    if (rc != 0)
+    {
+        printf("no oled attached to /dev/i2c-%d\n", display.i2c_node_address);
+        return 1;
+    }
+
 }
