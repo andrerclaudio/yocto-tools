@@ -8,7 +8,7 @@
 
 # VSCode
 .vscode
-!drivers/ssd1306/.vscode
+!Examples/ssd1306/c-lang/.vscode
 
 # Pycharm
 .idea

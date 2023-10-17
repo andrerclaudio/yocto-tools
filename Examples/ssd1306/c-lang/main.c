@@ -11,29 +11,28 @@
 
 void print_help(void) {
 
-    printf("---- HELP Message ---- \n\n");
-    printf("-I\tInit oled size (128x32 or 128x64 or 64x48)\n");
-    printf("-c\tClear (line number or all)\n");
-    printf("-d\t[0]Display OFF or [1]Display ON\n");
-    printf("-f\t[0]Small font 5x7 or [1]Normal font 8x8 (default normal font)\n");
-    printf("-h\tHelp message\n");
-    printf("-i\t0/normal oled 1/invert oled\n");
-    printf("-l\tPut your line to display\n");
-    printf("-m\tPut your strings to oled\n");
-    printf("-n\tI2C device node address (0,1,2..., default 0)\n");
-    printf("-r\t0/normal 180/rotate\n");
-    printf("-x\tX position\n");
-    printf("-y\tY position\n");
+    printf("\n");
+    printf("---- SSD1306 Driver ---- \n\n");
+    printf("\t-h\tHelp message\n");
+    printf("\t-c\tClear [X]line number or [0]all)\t\t\t\t[default: all]\n");
+    printf("\t-d\tDisplay [0]OFF or [1]ON\t\t\t\t\t[default: ON]\n");
+    printf("\t-f\t[0]Small font 5x7 or [1]Normal font 8x8\t\t\t[default: normal]\n");
+    printf("\t-i\tDisplay orientation [0]Normal or [1]invert\t\t[default: normal]\n");
+    printf("\t-l\tPrint your line to display\n");
+    printf("\t-m\tPrint your strings to display\n");
+    printf("\t-n\tI2C device node address (0,1,2...)\t\t\t[default: 0]\n");
+    printf("\t-r\tDisplay rotation [0]Normal or [180]Rotate\t\t[default: normal]\n");
+    printf("\t-x\tX position\n");
+    printf("\t-y\tY position\n\n\n");
 }
 
 int main (int argc, char **argv) {
-
-    char oled_type[OLED_TYPE_BUFFER_SIZE] = {0};
+    
     int cmd_opt = 0;
 
     while(cmd_opt != __ARGC_NULL) {
 
-        cmd_opt = getopt(argc, argv, "I:c::d:f:hi:l:m:n:r:x:y:");
+        cmd_opt = getopt(argc, argv, "c::d:f:hi:l:m:n:r:x:y:");
 
         if (argc < 2) {
 
@@ -47,10 +46,6 @@ int main (int argc, char **argv) {
             default:
                 print_help();
                 return __HELP;
-
-            case 'I':
-                strncpy(oled_type, optarg, sizeof(oled_type));
-                break;
 
             case 'c':
                 if (optarg)

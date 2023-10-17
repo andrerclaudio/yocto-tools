@@ -29,7 +29,7 @@ import logging
 import socket
 import subprocess
 
-from imx8mn_ssd1306 import SSD1306_128_32
+from ssd1306 import SSD1306_128_32
 from PIL import Image, ImageDraw, ImageFont
 
 logging.basicConfig(level=logging.INFO,
