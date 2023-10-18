@@ -1,8 +1,8 @@
 CC=gcc
 CFLAGS=-I ./ -Wall -Werror
 LDFLAGS=-static
-OBJS=main.o ssd1306.o linux_i2c.o
-BIN=ssd1306
+OBJS=main.o hal_functions.o driver_functions.o
+BIN=binary_file
 
 default: $(BIN)
 .PHONY: default clean

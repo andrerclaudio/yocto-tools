@@ -1,10 +1,11 @@
 """
 Just a simple script in python to toggle a led state each time a button is pressed.
-The button here is being pulled and not by checked by interruption.
-See the Device Tree in order to confirm physical pin designation (9 and 8) as below.
+The button here is being pulled and not being checked by interruption.
+See the Device Tree in order to confirm physical pin designation (9 and 8) as below and 
+whether they are being used already by another hardware or not.
 """
 
-# pylint: disable=import-error, multiple-imports, wrong-import-order, missing-function-docstring
+# pylint: disable=import-error, multiple-imports, wrong-import-order, missing-function-docstring, broad-exception-caught
 
 # Import necessary modules
 import gpiod  # Import the gpiod module for GPIO control
@@ -58,6 +59,9 @@ def run():
                     led.set_value(1)
 
             time.sleep(delay)  # Wait for the specified delay
+
+    except Exception as e:
+        print(e)
 
     finally:
         # Release GPIO resources when the script exits

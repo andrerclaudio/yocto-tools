@@ -7,7 +7,7 @@
 
 static int file_i2c = 0;
 
-uint8_t _i2c_init(int i2c, int dev_addr)
+ReturnCodes_t _i2c_init(int i2c, int dev_addr)
 {
 	if (file_i2c == 0)
 	{
@@ -17,49 +17,51 @@ uint8_t _i2c_init(int i2c, int dev_addr)
 		if (file_i2c < 0)
 		{
 			file_i2c = 0;
-			return 1;
+			return FAIL;
 		}
 		if (ioctl(file_i2c, I2C_SLAVE, dev_addr) < 0) // set slave address
 		{
 			close(file_i2c);
 			file_i2c = 0;
-			return 1;
+			return FAIL;
 		}
-		return 0;
+		return SUCCESS;
 	}
 	
 	// assume done init already
-	return 0;
+	return SUCCESS;
 }
 
-uint8_t _i2c_close()
+ReturnCodes_t _i2c_close()
 {
 	if (file_i2c != 0)
 	{
 		close(file_i2c);
 		file_i2c = 0;
-		return 0;
+		return SUCCESS;
 	}
 	
 	return 1;
 }
 
-uint8_t _i2c_write(uint8_t* ptr, int16_t len)
+ReturnCodes_t _i2c_write(uint8_t* ptr, int16_t len)
 {
-	if (file_i2c == 0 || ptr == 0 || len <= 0)
-		return 1;
+	if (!file_i2c) return FAIL;
+	if (ptr == NULL) return FAIL;
+	if (!len) return FAIL;
 				
 	write(file_i2c, ptr, len);
 	
-	return 0;
+	return SUCCESS;
 }
 
-uint8_t _i2c_read(uint8_t *ptr, int16_t len)
+ReturnCodes_t _i2c_read(uint8_t *ptr, int16_t len)
 {
-	if (file_i2c == 0 || ptr == 0 || len <= 0)
-		return 1;
+	if (!file_i2c) return FAIL;
+	if (ptr == NULL) return FAIL;
+	if (!len) return FAIL;
 				
 	read(file_i2c, ptr, len);
 
-	return 0;
+	return SUCCESS;
 }
