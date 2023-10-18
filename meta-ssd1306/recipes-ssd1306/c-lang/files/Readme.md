@@ -1,7 +1,7 @@
 # OLED SSD1306 Linux driver
 This is plain c code using linux I2C device node (/dev/i2c-X X for 0,1,2,3...).
 Please make sure the linux has run "modprobe i2c-dev".
-128x64 and 128x32 are supporting and using I2C interface ONLY
+128x32 only supported (but just call init with other setting to change) and using I2C interface ONLY
 ## Files
 **linux_i2c.c** source code for i2c control in linux device node.
 **linux_i2c.h** header file for i2c control in linux.
@@ -16,42 +16,35 @@ Require make and gcc. If you use cross compile, please self define $(CC).
 Type "make" to build binary "ssd1306_bin".
 Type "make clean" to clean the project.
 ## How to use
-- always init oled module ONCE when power up.
+- the software will init oled module ONCE when power up.
 - set the device node address EVERYTIME if not using default value /dev/i2c-0
 - the init oled module always reset XY cursor to (0,0)
 - all params can set together
 - clear screen if new text need to write, otherwise wording overlapping happened
-- resolution value stored in /tmp/.ssd1306_oled_type with format like "128x64" or "128x32" or "64x48"
+- resolution value stored in /tmp/.ssd1306_oled_type with format like "128x32"
 - always do display rotation first and then filling text. otherwise the text cause mirror
 - make sure the XY cursor setting in correct location before printing text
 ### Params
-```sh
--I		init oled (128x32 or 128x64 or 64x48)
--c		clear (line number or all)
--d		0/display off 1/display on
--f      0/small font 5x7 1/normal font 8x8 (default small font)
--h		help message
--i		0/normal oled 1/invert oled
--l		put your line to display
--m		put your strings to oled
--n      I2C device node address (0,1,2..., default 0)
--r		0/normal 180/rotate
--x		x position
--y 		y position
+```sh    
+-h  Help message.
+-c  Clear (line number or all).
+-d  Display OFF [0] or ON [1].
+-f  Small font 5x7 [0] or Normal font 8x8 [1].
+-i  Display Normal [0] or Invert [1].
+-r  Display rotation Normal [0] or Rotate [180].
+-l  Print your line to display.
+-m  Print your strings to display.
+-n  I2C device node address (0,1,2..., default 0).
+-x  X position.
+-y  Y position.
+
 ```
 ## Example
-### init the OLED once
-- resolution 128x64
-```sh
-$ ./ssd1306_bin -I 128x64
+### init the OLED
 ```
-- resolution 128x32
-```sh
-$ ./ssd1306_bin -I 128x32
-```
-- resolution 64x48
-```sh
-$ ./ssd1306_bin -I 64x48
+- The software will Init the Oled when you run it for the first time and save 
+the file "/tmp/.ssd1306_oled_type" with the related settings.
+- The resolution it is gonna trigger is 128x32.
 ```
 ### clear display
 - clear 1st line

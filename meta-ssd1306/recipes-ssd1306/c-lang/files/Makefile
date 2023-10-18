@@ -1,6 +1,5 @@
-# CC=gcc
-# 3CFLAGS=-I ./ -Wall
-# LDFLAGS=-static
+CFLAGS=-I ./ -Wall
+LDFLAGS=-static
 
 OBJS=main.o ssd1306.o linux_i2c.o
 BIN=ssd1306

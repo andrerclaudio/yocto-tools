@@ -326,7 +326,7 @@ PREFERRED_RPROVIDER_ssh = "openssh"
 
 ####### -------------------------------------------------------------------------------------------------------------------------------
 
-# Add a ouu-of-tree kermel module
+# Add an out-of-tree kermel module
 # MACHINE_EXTRA_RDEPENDS += "kernel-module-kdriverled"
 # Start the out-of-tree at start-up time
 # KERNEL_MODULE_AUTOLOAD += ""
