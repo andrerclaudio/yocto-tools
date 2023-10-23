@@ -8,7 +8,7 @@
 
 # VSCode
 .vscode
-!Examples/ssd1306/c-lang/.vscode
+!Examples/compiler/c-lang/.vscode
 
 # Pycharm
 .idea
