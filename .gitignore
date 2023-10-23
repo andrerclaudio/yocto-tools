@@ -8,6 +8,7 @@
 
 # VSCode
 .vscode
+!Examples/compiler/.vscode
 
 # Pycharm
 .idea
@@ -20,6 +21,7 @@
 *.ko
 *.obj
 *.elf
+*.bin
 
 # Linker output
 *.ilk
