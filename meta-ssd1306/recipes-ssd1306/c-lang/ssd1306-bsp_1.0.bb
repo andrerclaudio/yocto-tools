@@ -13,8 +13,7 @@ SRC_URI = "	\
 				file://linux_i2c.h \
 				file://font.h \
 			"
-
-# The module will added at /lib/modules/$(uname -r)/extra/
+			
 S = "${WORKDIR}"
 
 do_compile() {
@@ -26,4 +25,5 @@ do_install() {
     install -m 0755 ssd1306 ${D}${bindir}
 }
 
+# Find the bin file in /usr/bin folder
 FILES_${PN} += "${bindir}/*"

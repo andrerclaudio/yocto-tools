@@ -41,7 +41,7 @@ static void print_help(void) {
     printf("\t-r\tDisplay rotation Normal [0] or Rotate [180].\n");
     printf("\t-l\tPrint your line to display.\n");
     printf("\t-m\tPrint your strings to display.\n");
-    printf("\t-n\tI2C device node address (0,1,2..., default 0).\n");
+    printf("\t-n\tI2C device node address (0,1,2..., default 2).\n");
     printf("\t-x\tX position.\n");
     printf("\t-y\tY position.\n\n\n");
 }
@@ -60,7 +60,7 @@ int main (int argc, char **argv) {
     display.font = 0;
     display.inverted = -1;
     display.orientation = -1;
-    display.i2c_node_address = 0;
+    display.i2c_node_address = 2;
 
     // Fill the buffers with zeros
     memset(display.line, 0, LINE_BUFFER_MAX_SIZE);
