@@ -13,11 +13,11 @@ Please make sure the linux has run "modprobe i2c-dev".
 **Readme.md** this readme file.
 ## How to compile
 Require make and gcc. If you use cross compile, please self define $(CC).
-Type "make" to build binary "ssd1306_bin".
+Type "make" to build binary "ssd1306".
 Type "make clean" to clean the project.
 ## How to use
 - the software will init oled module ONCE when power up.
-- set the device node address EVERYTIME if not using default value /dev/i2c-0
+- set the device node address EVERYTIME if not using default value /dev/i2c-2
 - the init oled module always reset XY cursor to (0,0)
 - all params can set together
 - clear screen if new text need to write, otherwise wording overlapping happened
@@ -34,7 +34,7 @@ Type "make clean" to clean the project.
 -r  Display rotation Normal [0] or Rotate [180].
 -l  Print your line to display.
 -m  Print your strings to display.
--n  I2C device node address (0,1,2..., default 0).
+-n  I2C device node address (0,1,2..., default 2).
 -x  X position.
 -y  Y position.
 
@@ -49,11 +49,11 @@ the file "/tmp/.ssd1306_oled_type" with the related settings.
 ### clear display
 - clear 1st line
 ```sh
-./ssd1306_bin -c0
+./ssd1306 -c0
 ```
 - clear 2nd line
 ```sh
-$ ./ssd1306_bin -c1
+$ ./ssd1306 -c1
 ```
 - clear 4th line
 ```sh
@@ -90,7 +90,7 @@ $ ./ssd1306_bin -l "Hello World"
 ```sh
 $ ./ssd1306_bin -m "alpha\nbravo\ncharlie\ndelta"
 ```
-### I2C device address (default is /dev/i2c-0)
+### I2C device address (default is /dev/i2c-2)
 - using /dev/i2c-1
 ```sh
 $ ./ssd1306_bin -n 1

@@ -1,0 +1,12 @@
+[Unit]
+Description=Run modprobe command at boot to bring up Wireless hardware.
+Before=wpa_supplicant-nl80211@mlan0.service
+
+[Service]
+Type=oneshot
+ExecStart=/sbin/modprobe moal mod_para=nxp/wifi_mod_para.conf
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

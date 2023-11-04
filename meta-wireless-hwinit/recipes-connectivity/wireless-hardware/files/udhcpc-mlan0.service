@@ -1,0 +1,13 @@
+[Unit]
+Description=Run udhcpc to obtain an IP address for mlan0 interface
+After=wpa_supplicant-nl80211@mlan0.service
+
+[Service]
+Type=simple
+ExecStart=/sbin/udhcpc -i mlan0
+Restart=on-failure
+RestartSec=10
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
