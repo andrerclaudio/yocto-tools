@@ -51,6 +51,9 @@ IMAGE_INSTALL:append = " nano htop ntp procps git tzdata iperf3"
 # Setup eSDK
 SDK_EXT_TYPE = "full"
 
+# Set machine Hostname
+hostname:pn-base-files = "iMX8mn-evk"
+
 ############################ Use block below if you want to add a new reguldar user to the system.
 
 # INHERIT += "extrausers"
