@@ -4,7 +4,7 @@ SRC_URI += "file://wpa_supplicant-nl80211-mlan0.conf"
 
 
 SYSTEMD_AUTO_ENABLE = "enable"
-SYSTEMD_SERVICE:${PN}:append = " wpa_supplicant-nl80211@mlan0.service  "
+SYSTEMD_SERVICE:${PN}:append = " wpa_supplicant-nl80211@mlan0.service"
 
 
 do_install:append () {

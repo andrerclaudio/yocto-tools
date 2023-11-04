@@ -88,11 +88,6 @@ SDK_EXT_TYPE = "full"
 # BB_NUMBER_THREADS = "9"
 # PARALLEL_MAKE = "-j 9"
 
-# MACHINE_FEATURES = "wifi"
-# PACKAGECONFIG[wifi] = "--enable-wifi"
-
+# Add to your layers "meta-wireless-hwinit"
 # INIT_MANAGER = "systemd"
 # DISTRO_FEATURES:append = " wifi"
-# IMAGE_INSTALL:append = " kernel-module-nxp89xx linux-firmware-nxp89xx dhcp-client iw wpa-supplicant wireless-regdb-static"
-# Autoload WiFi driver on boot
-# KERNEL_MODULE_AUTOLOAD += “nxp89xx”
