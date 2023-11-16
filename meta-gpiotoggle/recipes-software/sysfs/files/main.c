@@ -95,16 +95,10 @@ int main()
                 printf("User button was pressed!\n");
                 fflush(stdout);
 
-                if (last_state == LED_OFF) {
+                // Toggle the led state
+                last_state ^= 1;
+                change_led_state(last_state);
 
-                    change_led_state(LED_ON);
-                    last_state = LED_ON;
-                } 
-                else {
-
-                    change_led_state(LED_OFF);
-                    last_state = LED_OFF;
-                }
             }
 
             sleep_mseconds(delay);
