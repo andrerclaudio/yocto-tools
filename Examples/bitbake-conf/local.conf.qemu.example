@@ -296,6 +296,9 @@ INHERIT += "rm_work"
 # Install some tools
 IMAGE_INSTALL:append = " nano htop ntp procps git tzdata iperf3"
 
+# Set timezone area
+DEFAULT_TIMEZONE = "America/Sao_Paulo"
+
 # Setup eSDK
 SDK_EXT_TYPE = "full"
 
