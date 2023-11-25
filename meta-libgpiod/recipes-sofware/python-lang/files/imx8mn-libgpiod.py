@@ -7,7 +7,8 @@ from enum import Enum, auto
 import threading
 import time
 import gpiod
-from gpiod.line_settings import Direction, Value, timedelta
+from gpiod.edge_event import EdgeEvent
+from gpiod.line_settings import Direction, Value, timedelta, Edge
 
 # Create a logger
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]: %(message)s")
@@ -47,7 +48,7 @@ class GpioInput(threading.Thread):
     def __init__(self, control:dict, gpio_controller:gpiod.LineRequest, input_number:int, lock: threading.Lock) -> None:
 
         threading.Thread.__init__(self)
-
+        
         self.control = control
         self.lock = lock
         self.bt_state = ButtonStatus.OPEN
@@ -63,22 +64,25 @@ class GpioInput(threading.Thread):
         Continuously monitors the GPIO input and updates the button state.
         """
         
-        logging.info(f"Starting button Thread [{self.input_number}]!")
+        logging.info(f"Starting button [Line: {self.input_number}] Thread.")
 
         try:
-
-            running = True
             
-            while running:
+            while True:
+
+                self.input.wait_edge_events(timeout=INPUT_DEBOUNCE_PERIOD)
 
                 with self.lock:
                     running = self.control['__KEEP_RUNNING']
+                    if not running:
+                        break
 
-                ret = self.input.get_value(self.input_number)
-                self.bt_state = self.__conv_button_value(ret)
-                time.sleep(INPUT_DEBOUNCE_PERIOD)
+                event:EdgeEvent = list(self.input.read_edge_events(max_events=1))[0]
+                event_type = event.event_type.name                
+                self.bt_state = ButtonStatus.CLOSED if event_type == 'FALLING_EDGE' else ButtonStatus.OPEN
+                logging.info(event_type)
 
-            logging.info(f"Finishing button Thread [{self.input_number}]!")
+            logging.info(f"Finishing button [Line: {self.input_number}] Thread!")
 
         except threading.ThreadError as e:
             logging.debug(e, exc_info=False)
@@ -132,6 +136,7 @@ def application():
                                         BUTTON:
                                         gpiod.LineSettings(
                                             direction=Direction.INPUT,
+                                            edge_detection=Edge.BOTH,
                                             debounce_period=timedelta(seconds=INPUT_DEBOUNCE_PERIOD),
                                         )
                                     }
@@ -156,7 +161,7 @@ def application():
                               )
 
         logging.info("Turning ON led ...")
-        lines.set_value(LED, value=LED_ON)
+        lines.set_value(line=LED, value=LED_ON)
 
         logging.info("Waiting button being pressed ...")
         while thr_input.state() is ButtonStatus.OPEN:
