@@ -2,22 +2,24 @@
 Turn On a led and keep it on until the Button is pressed.
 """
 
-# pylint: disable=import-error, multiple-imports, wrong-import-order, missing-function-docstring, broad-exception-caught
-
 import logging
+from enum import Enum, auto
+import threading
+import time
 import gpiod
 from gpiod.line_settings import Direction, Value, timedelta
 
 # Create a logger
-logger = logging.getLogger('libgpiod')
-# Set the logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-logger.setLevel(logging.DEBUG)
+logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s]: %(message)s")
 
 CONSUMER_NAME = 'App' # Consumer name
 
 # Define GPIO pin numbers
 LED = 9      # Assign pin 9 to the LED
 BUTTON = 8      # Assign pin 8 to the Button
+
+# Input particular settings
+INPUT_DEBOUNCE_PERIOD = 0.05
 
 # Led state definitions
 LED_ON = Value.ACTIVE
@@ -26,25 +28,87 @@ LED_OFF = Value.INACTIVE
 # Path to Line
 PATH = '/dev/gpiochip4'
 
+class ButtonStatus(Enum):
+    CLOSED = auto()
+    OPEN = auto()
 
-def conv_button_value(val:Value) -> bool:
+
+class GpioInput(threading.Thread):
     """
-    Convert GPIO button value from 'gpiod.request_lines.get_value'
-    to a boolean.
+    GpioInput class representing a thread monitoring a GPIO input.
 
     Args:
-        val (gpiod.line_settings.Value): GPIO button (get) value.
-
-    Returns:
-        bool: True if the button value is active, False otherwise.
+        control (dict): A dictionary containing control flags.
+        gpio_controller (gpiod.LineRequest): GPIO input configuration.
+        input_number (int): The number associated with this input.
+        lock (threading.Lock): Lock for synchronization with shared resources.
     """
 
-    return True if val == Value.ACTIVE else False
+    def __init__(self, control:dict, gpio_controller:gpiod.LineRequest, input_number:int, lock: threading.Lock) -> None:
 
+        threading.Thread.__init__(self)
+
+        self.control = control
+        self.lock = lock
+        self.bt_state = ButtonStatus.OPEN
+        self.input = gpio_controller
+        self.input_number = input_number
+        self.thread = threading.Thread()
+        self.thread.name = f"[Input-{input_number}]"
+        self.start()
+
+    def run(self):
+        """
+        Run method for the thread.
+        Continuously monitors the GPIO input and updates the button state.
+        """
+        
+        logging.info(f"Starting button Thread [{self.input_number}]!")
+
+        try:
+
+            running = True
+            
+            while running:
+
+                with self.lock:
+                    running = self.control['__KEEP_RUNNING']
+
+                ret = self.input.get_value(self.input_number)
+                self.bt_state = self.__conv_button_value(ret)
+                time.sleep(INPUT_DEBOUNCE_PERIOD)
+
+            logging.info(f"Finishing button Thread [{self.input_number}]!")
+
+        except threading.ThreadError as e:
+            logging.debug(e, exc_info=False)
+
+    def __conv_button_value(self, val:Value) -> Enum:
+        """
+        Convert GPIO button value from 'gpiod.request_lines.get_value'
+        to a boolean.
+
+        Args:
+            val (gpiod.line_settings.Value): GPIO button (get) value.
+
+        Returns:
+            bool: True if the button value is active, False otherwise.
+        """
+
+        return ButtonStatus.OPEN if val == Value.ACTIVE else ButtonStatus.CLOSED
+    
+    def state(self) -> Enum:
+        """
+        Get the current state of the button.
+
+        Returns:
+            ButtonStatus: The current state of the button.
+        """
+        return self.bt_state
 
 
 # Define the main function for running the script
-def run():
+def application():
     """
     Main function for running the script.
 
@@ -54,6 +118,8 @@ def run():
     Raises:
         gpiod.exception: If an error occurs during GPIO operations.
     """
+
+    logging.info("Starting the application!")
 
     # Request LINES config and others relevants values
     lines = gpiod.request_lines(PATH, 
@@ -66,26 +132,51 @@ def run():
                                         BUTTON:
                                         gpiod.LineSettings(
                                             direction=Direction.INPUT,
-                                            debounce_period=timedelta(milliseconds=100),
+                                            debounce_period=timedelta(seconds=INPUT_DEBOUNCE_PERIOD),
                                         )
                                     }
                                 )
 
+    # General Application control flags
+    # Values can change as the application requires it.
+    control_flags = {
+        
+        '__KEEP_RUNNING': True  # Tell the software must keep running.
+        }
+    
+    # Define a lock for synchronization
+    lock = threading.Lock()
+
     try:
 
+        thr_input = GpioInput(control=control_flags, 
+                              gpio_controller=lines, 
+                              input_number=BUTTON, 
+                              lock=lock
+                              )
+
+        logging.info("Turning ON led ...")
         lines.set_value(LED, value=LED_ON)
 
-        while conv_button_value(lines.get_value(BUTTON)):
+        logging.info("Waiting button being pressed ...")
+        while thr_input.state() is ButtonStatus.OPEN:
             pass
-
+            
+        logging.info("Turning OFF led and releasing resources ...")
         lines.set_value(line=LED, value=LED_OFF)
 
-    except gpiod.exception as e:
-        logger.debug(e, exc_info=False)
+        with lock:
+            # Signalize the application will stop
+            control_flags["__KEEP_RUNNING"] = False
+        # Hold a while to make sure the threads are down
+        time.sleep(1)
+
+    except Exception as e:
+        logging.debug(e, exc_info=False)
 
     finally:
         lines.release()
 
 if __name__ == "__main__":
     # Run the script
-    run()
+    application()
