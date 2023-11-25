@@ -39,12 +39,7 @@ def conv_button_value(val:Value) -> bool:
         bool: True if the button value is active, False otherwise.
     """
 
-    ret = False
-
-    if val == Value.ACTIVE:
-        ret = True
-
-    return ret
+    return True if val == Value.ACTIVE else False
 
 
 
