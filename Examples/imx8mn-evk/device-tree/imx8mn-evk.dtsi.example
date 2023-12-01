@@ -51,7 +51,8 @@ sensor@48 {
 #
 # Add a Oled Display to EVK board using I2C bus.
 # It will be present on linux /sys/bus environment as a Frame Buffer.
-# You must adjust the system using Menuconfig and enabling Solomon video driver.
+# Also in /sys/class/graphics/fb0
+# You must adjust the Kernel using Menuconfig and enabling Solomon video driver.
 # If using Python wrapper script you do not need to enable it here.
 # 
 ssd1306: oled@3c {
