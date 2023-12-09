@@ -1,4 +1,3 @@
-# Copyright 2018-2021 NXP
 # Released under the MIT license (see COPYING.MIT for the terms)
 
 DESCRIPTION = "This is the basic core image with minimal tests"
@@ -37,16 +36,18 @@ IMAGE_INSTALL += " \
     ${CLINFO} \
 "
 
+# Image Timezone settings
 DEFAULT_TIMEZONE = "America/Sao_Paulo"
 
+# Extra settings
 CORE_IMAGE_EXTRA_INSTALL += "agnes-packagegroup-testapps"
+INIT_MANAGER = "systemd"
 
 # Choose right Wifi firmware
 # PREFERRED_RPROVIDER_linux-firmware-bcm4359-pcie = "firmware-nxp-wifi"
 
 # Add to your layers "meta-wireless-hwinit" and change SSID and PASSWORD in "wpa_supplicant-nl80211-mlan0.conf"
-# INIT_MANAGER = "systemd"
-# DISTRO_FEATURES:append = " wifi"
+# to enable board Wifi.
 
 CLINFO              ?= ""
 CLINFO:imxgpu        = "clinfo"
