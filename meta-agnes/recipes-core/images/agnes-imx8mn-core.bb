@@ -40,7 +40,7 @@ IMAGE_INSTALL += " \
 DEFAULT_TIMEZONE = "America/Sao_Paulo"
 
 # Extra settings
-CORE_IMAGE_EXTRA_INSTALL += "agnes-packagegroup-testapps"
+# CORE_IMAGE_EXTRA_INSTALL += "agnes-packagegroup-testapps"
 
 # Add to your layers "meta-wireless-hwinit" and change SSID and PASSWORD in "wpa_supplicant-nl80211-mlan0.conf"
 # to enable board Wifi.

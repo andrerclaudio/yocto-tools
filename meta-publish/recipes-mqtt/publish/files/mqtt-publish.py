@@ -1,3 +1,8 @@
+#!/usr/bin/env python3
+# pylint: disable=line-too-long
+# indent = tab
+# tab-size = 4
+
 """
 Copyright (c) 2023 Andre Ribeiro Claudio
 Author: Andre Ribeiro
@@ -20,8 +25,6 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
-
-# pylint:disable=line-too-long
 
 # Build-in libraries
 import argparse
@@ -179,7 +182,7 @@ if __name__ == "__main__":
     # Script starting point.
 
     parser = argparse.ArgumentParser(description="Publish messages to Mqtt Topic.",
-                                     usage="\n$ python3 %(prog)s -p topic-to-publish 'message to publish'")
+                                     usage="\n$%(prog)s -p topic-to-publish 'message to publish'")
 
     # Add required arguments for specifying the topic and message
     parser.add_argument("-p", "--topic", required=True, help="Specify the Mqtt Topic to publish to.")
