@@ -1,0 +1,89 @@
+From f64dce79cfbc150b9314f5779eabe9a6a625ce9e Mon Sep 17 00:00:00 2001
+From: Andre Ribeiro <andre.ribeiro.srs@gmail.com>
+Date: Wed, 15 Nov 2023 16:51:16 -0300
+Subject: [PATCH] Adding Led and Button to Device Tree and using both.
+
+---
+ arch/arm64/boot/dts/freescale/imx8mn-evk.dtsi | 28 ++++++++++++++++++-
+ drivers/dma/fsl-dpaa2-qdma/dpaa2-qdma.c       |  0
+ drivers/firmware/imx/scu-pd.c                 |  0
+ include/uapi/linux/hx280enc.h                 |  0
+ sound/soc/fsl/fsl_easrc_m2m.c                 |  0
+ 5 files changed, 27 insertions(+), 1 deletion(-)
+ mode change 100755 => 100644 drivers/dma/fsl-dpaa2-qdma/dpaa2-qdma.c
+ mode change 100755 => 100644 drivers/firmware/imx/scu-pd.c
+ mode change 100755 => 100644 include/uapi/linux/hx280enc.h
+ mode change 100755 => 100644 sound/soc/fsl/fsl_easrc_m2m.c
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mn-evk.dtsi b/arch/arm64/boot/dts/freescale/imx8mn-evk.dtsi
+index 6c2d66cdd2f4..00ef674d0777 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mn-evk.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mn-evk.dtsi
+@@ -11,6 +11,19 @@ chosen {
+ 		stdout-path = &uart2;
+ 	};
+ 
++	gpio-buttons {
++		compatible = "gpio-keys";
++		pinctrl-names = "default";
++		pinctrl-0 = <&pinctrl_gpio_key>;
++		
++		button {
++			label = "GPIO Key TOGGLE";
++			debounce-interval = <100>;
++			gpios = <&gpio5 8 GPIO_ACTIVE_HIGH>;
++			linux,code = <KEY_LIGHTS_TOGGLE>;
++		};
++	};
++
+ 	gpio-leds {
+ 		compatible = "gpio-leds";
+ 		pinctrl-names = "default";
+@@ -19,6 +32,12 @@ gpio-leds {
+ 		status {
+ 			label = "yellow:status";
+ 			gpios = <&gpio3 16 GPIO_ACTIVE_HIGH>;
++			linux,default-trigger = "heartbeat";
++		};
++
++		app {
++			label = "Led";
++			gpios = <&gpio5 9 GPIO_ACTIVE_HIGH>;
+ 			default-state = "on";
+ 		};
+ 	};
+@@ -491,7 +510,7 @@ &uart3 {
+ 	assigned-clocks = <&clk IMX8MN_CLK_UART3>;
+ 	assigned-clock-parents = <&clk IMX8MN_SYS_PLL1_80M>;
+ 	fsl,uart-has-rtscts;
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &usdhc1 {
+@@ -616,6 +635,13 @@ MX8MN_IOMUXC_NAND_DATA03_QSPI_A_DATA3		0x84
+ 	pinctrl_gpio_led: gpioledgrp {
+ 		fsl,pins = <
+ 			MX8MN_IOMUXC_NAND_READY_B_GPIO3_IO16	0x19
++			MX8MN_IOMUXC_ECSPI1_SS0_GPIO5_IO9		0x19
++		>;
++	};
++
++	pinctrl_gpio_key: gpiokeygrp {
++		fsl,pins = <
++			MX8MN_IOMUXC_ECSPI1_MISO_GPIO5_IO8		0x157
+ 		>;
+ 	};
+ 
+diff --git a/drivers/dma/fsl-dpaa2-qdma/dpaa2-qdma.c b/drivers/dma/fsl-dpaa2-qdma/dpaa2-qdma.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/firmware/imx/scu-pd.c b/drivers/firmware/imx/scu-pd.c
+old mode 100755
+new mode 100644
+diff --git a/include/uapi/linux/hx280enc.h b/include/uapi/linux/hx280enc.h
+old mode 100755
+new mode 100644
+diff --git a/sound/soc/fsl/fsl_easrc_m2m.c b/sound/soc/fsl/fsl_easrc_m2m.c
+old mode 100755
+new mode 100644

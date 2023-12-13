@@ -140,7 +140,7 @@ PACKAGE_CLASSES ?= "package_rpm"
 # There are other application targets that can be used here too, see
 # meta/classes/image.bbclass and meta/classes/core-image.bbclass for more details.
 # We default to enabling the debugging tweaks.
-EXTRA_IMAGE_FEATURES ?= "debug-tweaks"
+EXTRA_IMAGE_FEATURES ?= "debug-tweaks dev-pkgs"
 
 #
 # Additional image features
@@ -294,7 +294,11 @@ RM_OLD_IMAGE = "1"
 INHERIT += "rm_work"
 
 # Install some tools
-IMAGE_INSTALL:append = " nano htop ntp procps git tzdata iperf3"
+IMAGE_INSTALL:append = " tzdata nano htop git iperf3 libgpiod python3 python3-pip python3-gpiod"
+DEFAULT_TIMEZONE = "America/Sao_Paulo"
+
+# Set timezone area
+DEFAULT_TIMEZONE = "America/Sao_Paulo"
 
 # Setup eSDK
 SDK_EXT_TYPE = "full"
@@ -337,3 +341,11 @@ PREFERRED_RPROVIDER_ssh = "openssh"
 
 # BB_NUMBER_THREADS = "9"
 # PARALLEL_MAKE = "-j 9"
+
+# Set GLIBC_GENERATE_LOCALES to the locales you wish to generate should you not
+# wish to perform the time-consuming step of generating all LIBC locales.
+# NOTE: If removing en_US.UTF-8 you will also need to uncomment, and set
+# appropriate value for IMAGE_LINGUAS.
+# WARNING: this may break localisation!
+GLIBC_GENERATE_LOCALES = "en_GB.UTF-8 en_US.UTF-8"
+IMAGE_LINGUAS ?= "en-gb"
