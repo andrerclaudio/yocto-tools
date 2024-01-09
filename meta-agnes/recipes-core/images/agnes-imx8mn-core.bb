@@ -33,11 +33,17 @@ IMAGE_INSTALL += " \
     nano \
     htop \
     iperf3 \
+    git \
+    libgpiod \
+    python3 \
+    python3-pip \
+    python3-modules \
+    python3-misc \
     ${CLINFO} \
 "
 
 # Image Timezone settings
-DEFAULT_TIMEZONE = "America/Sao_Paulo"
+# DEFAULT_TIMEZONE = "America/Sao_Paulo"
 
 # Extra settings
 # CORE_IMAGE_EXTRA_INSTALL += "agnes-packagegroup-testapps"
