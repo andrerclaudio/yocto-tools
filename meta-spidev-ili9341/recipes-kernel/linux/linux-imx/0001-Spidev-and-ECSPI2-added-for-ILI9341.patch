@@ -1,0 +1,98 @@
+From 76cdb2bafcab7cc46a234a278b68fc3cf9f65712 Mon Sep 17 00:00:00 2001
+From: Andre Ribeiro <andre.ribeiro.srs@gmail.com>
+Date: Sat, 17 Feb 2024 08:33:45 -0300
+Subject: [PATCH] Spidev and ECSPI2 added for ILI9341
+
+---
+ arch/arm64/boot/dts/freescale/imx8mn-evk.dtsi | 30 +++++++++++++++++--
+ drivers/dma/fsl-dpaa2-qdma/dpaa2-qdma.c       |  0
+ drivers/firmware/imx/scu-pd.c                 |  0
+ include/uapi/linux/hx280enc.h                 |  0
+ sound/soc/fsl/fsl_easrc_m2m.c                 |  0
+ 5 files changed, 27 insertions(+), 3 deletions(-)
+ mode change 100755 => 100644 drivers/dma/fsl-dpaa2-qdma/dpaa2-qdma.c
+ mode change 100755 => 100644 drivers/firmware/imx/scu-pd.c
+ mode change 100755 => 100644 include/uapi/linux/hx280enc.h
+ mode change 100755 => 100644 sound/soc/fsl/fsl_easrc_m2m.c
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mn-evk.dtsi b/arch/arm64/boot/dts/freescale/imx8mn-evk.dtsi
+index 6c2d66cdd2f4..1ab632787486 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mn-evk.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mn-evk.dtsi
+@@ -19,7 +19,7 @@ gpio-leds {
+ 		status {
+ 			label = "yellow:status";
+ 			gpios = <&gpio3 16 GPIO_ACTIVE_HIGH>;
+-			default-state = "on";
++			linux,default-trigger = "heartbeat";
+ 		};
+ 	};
+ 
+@@ -169,6 +169,22 @@ codec {
+ 	};
+ };
+ 
++&ecspi2 {
++	#address-cells = <1>;
++	#size-cells = <0>;
++	pinctrl-names = "default";
++	fsl,spi-num-chipselects = <0>;
++	cs-gpios = <0>;
++	pinctrl-0 = <&pinctrl_ecspi2>;
++	status = "okay";
++
++	spidev0: spi@0{
++		reg = <0>;
++		compatible = "rohm,dh2228fv";
++		spi-max-frequency = <32000000>;
++	};
++};
++
+ &cameradev {
+ 	status = "okay";
+ };
+@@ -288,7 +304,7 @@ &i2c3 {
+ 	pinctrl-1 = <&pinctrl_i2c3_gpio>;
+ 	scl-gpios = <&gpio5 18 GPIO_ACTIVE_HIGH>;
+ 	sda-gpios = <&gpio5 19 GPIO_ACTIVE_HIGH>;
+-	status = "okay";
++	status = "disabled";
+ 
+ 	pca6416: gpio@20 {
+ 		compatible = "ti,tca6416";
+@@ -491,7 +507,7 @@ &uart3 {
+ 	assigned-clocks = <&clk IMX8MN_CLK_UART3>;
+ 	assigned-clock-parents = <&clk IMX8MN_SYS_PLL1_80M>;
+ 	fsl,uart-has-rtscts;
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &usdhc1 {
+@@ -619,6 +635,14 @@ MX8MN_IOMUXC_NAND_READY_B_GPIO3_IO16	0x19
+ 		>;
+ 	};
+ 
++	pinctrl_ecspi2: ecspi2grp {
++		fsl,pins = <
++			MX8MN_IOMUXC_ECSPI2_SCLK_ECSPI2_SCLK		0x82
++			MX8MN_IOMUXC_ECSPI2_MOSI_ECSPI2_MOSI		0x82
++			MX8MN_IOMUXC_ECSPI2_MISO_ECSPI2_MISO		0x82
++		>;
++	};
++
+ 	pinctrl_i2c2_gpio: i2c2grp-gpio {
+ 		fsl,pins = <
+ 			MX8MN_IOMUXC_I2C2_SCL_GPIO5_IO16		0x1c3
+diff --git a/drivers/dma/fsl-dpaa2-qdma/dpaa2-qdma.c b/drivers/dma/fsl-dpaa2-qdma/dpaa2-qdma.c
+old mode 100755
+new mode 100644
+diff --git a/drivers/firmware/imx/scu-pd.c b/drivers/firmware/imx/scu-pd.c
+old mode 100755
+new mode 100644
+diff --git a/include/uapi/linux/hx280enc.h b/include/uapi/linux/hx280enc.h
+old mode 100755
+new mode 100644
+diff --git a/sound/soc/fsl/fsl_easrc_m2m.c b/sound/soc/fsl/fsl_easrc_m2m.c
+old mode 100755
+new mode 100644
